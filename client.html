@@ -5,16 +5,21 @@
         <title>Batalha naval</title>
     </head>
     <body>
+
+        <div id="espera">
+
+        </div>
+
         <script>
             const ws = new WebSocket('ws://localhost:8080');
 
             ws.onopen = function(event) {
                 console.log('Conexão estabelecida');
-                ws.send('Olá, servidor!');
             };
 
             ws.onmessage = function(event) {
                 console.log('Mensagem do servidor:', event.data.toString());
+                document.getElementById("espera").innerHTML = event.data.toString();
             };
 
             ws.onerror = function(event) {
