@@ -41,5 +41,4 @@ function startGame(partida) {
     partida.player2.send('A partida começou');
 }
 
-
 console.log(`servidor rodando na porta ${port}`);
