@@ -1,6 +1,7 @@
 const ws = new WebSocket('ws://localhost:8080');
 
 let tabuleiro = []
+let player = null;
 
 ws.onopen = function (event) {
     console.log('Conexão estabelecida');
@@ -11,18 +12,22 @@ ws.onmessage = function (event) {
 
     if (conteudo) {
         console.log(conteudo);
-        console.log(conteudo.corpo.tabuleiro);
-
-        if (conteudo.tipo === "PREENCHERTABULEIRO") {
+        
+        if (conteudo.tipo === "AGUARDANDOJOGADOR") {
+            document.getElementById("espera").classList.remove("display-none");
+            document.getElementById("preencher-tabuleiro").classList.add("display-none");
+        } else if (conteudo.tipo === "PREENCHERTABULEIRO") {
             document.getElementById("espera").classList.add("display-none");
             document.getElementById("preencher-tabuleiro").classList.remove("display-none");
 
+            player = conteudo.corpo.player;
             tabuleiro = conteudo.corpo.tabuleiro;
 
             exibirMeuTabuleiro();
+        } else if (conteudo.tipo ===  "INICIARPARTIDA") {
+            
         }
     }
-
 };
 
 ws.onerror = function (event) {
@@ -31,7 +36,7 @@ ws.onerror = function (event) {
 
 function exibirMeuTabuleiro() {
     let meu_tabuleiro = document.getElementById("meu-tabuleiro");
-    
+
     meu_tabuleiro.innerHTML = null;
 
     tabuleiro.forEach(linha => {
@@ -61,6 +66,14 @@ function selecionar(coordenada) {
     });
 
     exibirMeuTabuleiro();
+    ws.send(JSON.stringify({
+        tipo: 'SELECIONANDOLOCALTABULEIRO',
+        corpo: {
+            player: player,
+            mensagem: `O jogador (${player.id}) selecionou a coordenada: ${coordenada}`,
+            tabuleiro: tabuleiro
+        }
+    }));
 }
 
 function deselecionar(coordenada) {
@@ -73,4 +86,14 @@ function deselecionar(coordenada) {
     });
 
     exibirMeuTabuleiro();
+}
+
+function prontoParaJogar() {
+    ws.send(JSON.stringify({
+        tipo: 'PRONTOPARAJOGAR',
+        corpo: {
+            player: player,
+            mensagem: `O jogador (${player.id}) está pronto para iniciar a partida!`,
+        }
+    }));
 }
