@@ -1,0 +1,44 @@
+
+body {
+    background-color: rgb(9, 9, 121);
+    color: whitesmoke;
+}
+
+#espera {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 44px;
+}
+
+.display-none {
+    display: none;
+}
+
+#preencher-tabuleiro {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 44px;
+}
+
+.tabuleiro-unico {
+    margin: auto;
+}
+
+#meu-tabuleiro {
+    width: 80%;
+    height: 80%;
+    text-align: center; 
+    font-size: 24px;
+}
+
+#meu-tabuleiro td {
+    border: 3px solid #000000;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.selecionado {
+    background-color: rgb(11, 184, 77);
+}

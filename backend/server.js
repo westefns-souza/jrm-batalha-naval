@@ -1,6 +1,5 @@
 const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
-const { json } = require('express/lib/response');
 
 const port = 8080;
 const wss = new WebSocket.Server({ port: port });
@@ -25,7 +24,11 @@ wss.on('connection', function connection(ws) {
     associacaoDeJogadores(ws);
 
     ws.on('close', function close() {
-        desassociacaoDeJogadores(ws);
+        if (ws === partida.player1) {
+            partida.player1 = null;
+        } else if (ws === partida.player2) {
+            partida.player2 = null;
+        }
     });
 });
 
@@ -60,35 +63,10 @@ function adicionarJogador() {
     return player;
 }
 
-function desassociacaoDeJogadores(ws) {
-    if (ws === partida.player1) {
-        partida.player1 = null;
-    } else if (ws === partida.player2) {
-        partida.player2 = null;
-    }
-}
-
 function startGame(partida) {
-    let mensagemInicioDaPartida = 'A partida começou!';
-    
-    players_has_ws[partida.player1.id].send(JSON.stringify({
-        tipo: 'PREENCHERTABULEIRO',
-        corpo: {
-            player: partida.player1,
-            mensagem: mensagemInicioDaPartida
-        }
-    }));
-
-    players_has_ws[partida.player2.id].send(JSON.stringify({
-        tipo: 'PREENCHERTABULEIRO',
-        corpo: {
-            player: partida.player2,
-            mensagem: mensagemInicioDaPartida
-        }
-    }));
-
-    partida.tabuleiro_player1 = generateTable();
-    partida.tabuleiro_player2 = generateTable();
+    let initialTable = generateTable();
+    partida.tabuleiro_player1 = initialTable;
+    partida.tabuleiro_player2 = initialTable;
 
     players_has_ws[partida.player1.id].send(JSON.stringify({
         tipo: 'PREENCHERTABULEIRO',
