@@ -215,8 +215,22 @@ function readyToStart(playerId) {
     
     if (partida.player1.id === playerId) {
         partida.player1_ready = true;
+        players_has_ws[partida.player1.id].send(JSON.stringify({
+            tipo: 'ESPEREPRONTODOOUTROJOGADOR',
+            corpo: {
+                player: partida.player1,
+                mensagem: 'Espero o seu oponente está pronto.',
+            }
+        }));
     } else {
         partida.player2_ready = true;
+        players_has_ws[partida.player2.id].send(JSON.stringify({
+            tipo: 'ESPEREPRONTODOOUTROJOGADOR',
+            corpo: {
+                player: partida.player1,
+                mensagem: 'Espero o seu oponente está pronto.',
+            }
+        }));
     }
 
     partidas[indexDaPartida] = partida;

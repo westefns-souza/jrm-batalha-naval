@@ -21,7 +21,21 @@
             <tbody id="meu-tabuleiro"></tbody>
         </table>
 
-        <button type="button" onclick="prontoParaJogar()">Pronto para jogar!</button>
+        <button id="btn-pronto" type="button" onclick="prontoParaJogar()">Pronto para jogar!</button>
+
+        <p id="msg-pronto">Espere seu oponente está pronto!</p>
+    </div>
+
+    <div id="segunda-fase" class="display-none">
+        <p>Batalha Iniciada</p>
+        
+        <table class="meu-tabuleiro">
+            <tbody id="meu-tabuleiro-segunda-fase"></tbody>
+        </table>
+
+        <table class="tabuleiro-oponente">
+            <tbody id="tabuleiro-oponente-segunda-fase"></tbody>
+        </table>
     </div>
 
     <script src="scripts.js"></script>
