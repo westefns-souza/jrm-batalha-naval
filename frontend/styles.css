@@ -1,4 +1,3 @@
-
 body {
     background-color: rgb(9, 9, 121);
     color: whitesmoke;
@@ -29,7 +28,7 @@ body {
 #meu-tabuleiro {
     width: 80%;
     height: 80%;
-    text-align: center; 
+    text-align: center;
     font-size: 24px;
 }
 
@@ -40,18 +39,28 @@ body {
 }
 
 .selecionado {
-    background-color: rgb(11, 184, 77);
+    background-color: rgb(144, 11, 184);
 }
 
-.meu-tabuleiro, .tabuleiro-oponente {
-    width: 30%;
-    height: 80%;
-    text-align: center; 
+.acertou {
+    background-color: rgb(63, 241, 19);
+}
+
+.errou {
+    background-color: rgb(184, 11, 40);
+}
+ 
+.meu-tabuleiro,
+.tabuleiro-oponente {
+    display: inline-block;
+    width: 45%;
+    margin: auto;
+    text-align: center;
     font-size: 24px;
-    display: inline;
 }
 
-.meu-tabuleiro td, .tabuleiro-oponente td {
+.meu-tabuleiro td,
+.tabuleiro-oponente td {
     border: 3px solid #000000;
     padding: 5px;
     cursor: pointer;

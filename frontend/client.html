@@ -16,19 +16,19 @@
 
     <div id="preencher-tabuleiro" class="display-none">
         <p>Preencher tabuleiro</p>
-        
+
         <table class="tabuleiro-unico">
             <tbody id="meu-tabuleiro"></tbody>
         </table>
 
         <button id="btn-pronto" type="button" onclick="prontoParaJogar()">Pronto para jogar!</button>
 
-        <p id="msg-pronto">Espere seu oponente está pronto!</p>
+        <p id="msg-pronto" class="display-none">Espere seu oponente está pronto!</p>
     </div>
 
     <div id="segunda-fase" class="display-none">
         <p>Batalha Iniciada</p>
-        
+
         <table class="meu-tabuleiro">
             <tbody id="meu-tabuleiro-segunda-fase"></tbody>
         </table>
@@ -36,6 +36,8 @@
         <table class="tabuleiro-oponente">
             <tbody id="tabuleiro-oponente-segunda-fase"></tbody>
         </table>
+
+        <p id="msg" class="display-none"></p>
     </div>
 
     <script src="scripts.js"></script>

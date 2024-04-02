@@ -27,6 +27,8 @@ wss.on('connection', function connection(ws) {
             updateTable(conteudo.corpo.player.id, conteudo.corpo.tabuleiro)
         } else if (conteudo.tipo === "PRONTOPARAJOGAR") {
             readyToStart(conteudo.corpo.player.id);
+        } else if (conteudo.tipo === "SELECIONANDOLOCALTABULEIROOPONENTE") {
+            updateTableSecondTurn(conteudo.corpo.player.id, conteudo.corpo.tabuleiro_inimigo)
         }
     });
 });
@@ -98,6 +100,7 @@ function generateTable() {
             tabela.push({ 
                 coordenada: letras[j] + i.toString(),
                 barco: false,
+                selecionado: false,
             });
         }
 
@@ -154,7 +157,7 @@ function desconectarJogador(playerId) {
 
     if (playerId === partida.player1.id) {
         partida.player1 = null;
-        console.log(`Jogador 1 (${playerId}) foi desconectado da partida: ${partida.id}`,)
+        console.log(`Jogador 1 (${playerId}) foi desconectado da partida: ${partida.id}`)
         
         if (partida.player2 != null) {
             partida.player1 = partida.player2;
@@ -169,7 +172,7 @@ function desconectarJogador(playerId) {
     } else if (playerId === partida.player2.id) {
         partida.player2 = null;
         partida.tabuleiro_player2 = generateTable();
-        console.log(`Jogador 2 (${playerId}) foi desconectado da partida: ${partida.id}`,)
+        console.log(`Jogador 2 (${playerId}) foi desconectado da partida: ${partida.id}`)
         waitPlayer(partida);
         sendMensagemWait(partida.player1);
     }
@@ -248,23 +251,137 @@ function startFase2Gagem(partida) {
     let indexDaPartida = partidas.findIndex(({ id }) => id != partida.id);
     partidas[indexDaPartida] = partida
 
-    players_has_ws[partida.player1.id].send(JSON.stringify({
-        tipo: 'INICIARPARTIDA',
-        corpo: {
-            player: partida.player1,
-            mensagem: 'Partida iniciada',
-            tabuleiro: partida.tabuleiro_player1,
-            tabuleiro_inimigo: partida.tabuleiro_player2,
-        }
-    }));
+    console.log(`O Jogador 1 (${partida.player1.id}) está atacando na partida: ${partida.id}`);
+        players_has_ws[partida.player1.id].send(JSON.stringify({
+            tipo: 'ATACAR',
+            corpo: {
+                player: partida.player1,
+                mensagem: 'É a sua vez, ataque!',
+                tabuleiro: partida.tabuleiro_player1,
+                tabuleiro_inimigo: partida.tabuleiro_player2,
+            }
+        }));
+        
+        console.log(`O Jogador 2 (${partida.player2.id}) está esperando o ataque na partida: ${partida.id}`);
+        players_has_ws[partida.player2.id].send(JSON.stringify({
+            tipo: 'ESPERARATAQUE',
+            corpo: {
+                player: partida.player2,
+                mensagem: 'É a vez do jogador 1, aguarde!',
+                tabuleiro: partida.tabuleiro_player2,
+                tabuleiro_inimigo: partida.tabuleiro_player1,
+            }
+        }));
+}
 
-    players_has_ws[partida.player2.id].send(JSON.stringify({
-        tipo: 'INICIARPARTIDA',
-        corpo: {
-            player: partida.player2,
-            mensagem: 'Partida iniciada',
-            tabuleiro: partida.tabuleiro_player2,
-            tabuleiro_inimigo: partida.tabuleiro_player1,
+function updateTableSecondTurn(playerId, enemyTable) {
+    let partida = obterPartidaPorPlayerId(playerId);
+
+    let indexDaPartida = partidas.findIndex(({ id }) => id != partida.id);
+    
+    if (partida.player1.id === playerId) {
+        partida.tabuleiro_player2 = enemyTable;
+        if(verifyTable(enemyTable)) {
+            console.log(`O Jogador 2 (${partida.player2.id}) é o vencedor da partida: ${partida.id}`);
+            
+            players_has_ws[partida.player1.id].send(JSON.stringify({
+                tipo: 'VENCEDOR',
+                corpo: {
+                    player: partida.player1,
+                    mensagem: 'Você é o vencedor!',
+                    tabuleiro: partida.tabuleiro_player2,
+                tabuleiro_inimigo: partida.tabuleiro_player1,
+                }
+            }));
+            
+            players_has_ws[partida.player2.id].send(JSON.stringify({
+                tipo: 'PERDEDOR',
+                corpo: {
+                    player: partida.player2,
+                    mensagem: 'Você perdeu!',
+                    tabuleiro: partida.tabuleiro_player2,
+                    tabuleiro_inimigo: partida.tabuleiro_player1,
+                }
+            }));
+            return;
         }
-    }));
+
+        console.log(`O Jogador 1 (${partida.player1.id}) está esperando o ataque na partida: ${partida.id}`);
+        players_has_ws[partida.player1.id].send(JSON.stringify({
+            tipo: 'ESPERARATAQUE',
+            corpo: {
+                player: partida.player1,
+                mensagem: 'É a vez do jogador 2, aguarde!',
+                tabuleiro: partida.tabuleiro_player1,
+                tabuleiro_inimigo: partida.tabuleiro_player2,
+            }
+        }));
+        
+        console.log(`O Jogador 2 (${partida.player2.id}) está atacando na partida: ${partida.id}`);
+        players_has_ws[partida.player2.id].send(JSON.stringify({
+            tipo: 'ATACAR',
+            corpo: {
+                player: partida.player2,
+                mensagem: 'É a sua vez, ataque!',
+                tabuleiro: partida.tabuleiro_player2,
+                tabuleiro_inimigo: partida.tabuleiro_player1,
+            }
+        }));
+    } else {
+        partida.tabuleiro_player1 = enemyTable;
+        
+        if(verifyTable(enemyTable)) {
+            console.log(`O Jogador 2 (${partida.player2.id}) é o vencedor da partida: ${partida.id}`);
+            
+            players_has_ws[partida.player2.id].send(JSON.stringify({
+                tipo: 'VENCEDOR',
+                corpo: {
+                    player: partida.player2,
+                    mensagem: 'Você é o vencedor!'
+                }
+            }));
+            
+            players_has_ws[partida.player1.id].send(JSON.stringify({
+                tipo: 'PERDEDOR',
+                corpo: {
+                    player: partida.player1,
+                    mensagem: 'Você é o perdeu!'
+                }
+            }));
+            return;
+        }
+        
+        console.log(`O Jogador 1 (${partida.player1.id}) está atacando na partida: ${partida.id}`);
+        players_has_ws[partida.player1.id].send(JSON.stringify({
+            tipo: 'ATACAR',
+            corpo: {
+                player: partida.player1,
+                mensagem: 'É a sua vez, ataque!',
+                tabuleiro: partida.tabuleiro_player1,
+                tabuleiro_inimigo: partida.tabuleiro_player2,
+            }
+        }));
+        
+        console.log(`O Jogador 2 (${partida.player2.id}) está esperando o ataque na partida: ${partida.id}`);
+        players_has_ws[partida.player2.id].send(JSON.stringify({
+            tipo: 'ESPERARATAQUE',
+            corpo: {
+                player: partida.player2,
+                mensagem: 'É a vez do jogador 1, aguarde!',
+                tabuleiro: partida.tabuleiro_player2,
+                tabuleiro_inimigo: partida.tabuleiro_player1,
+            }
+        }));
+    }
+
+    partidas[indexDaPartida] = partida;
+}
+
+function verifyTable(table) {
+    const quantidadeSelecionados = table.reduce((acc, linha) => {
+        const linhaSelecionados = linha.filter(objeto => objeto.barco === true && objeto.selecionado === false).length;
+        return acc + linhaSelecionados;
+    }, 0);
+
+    return quantidadeSelecionados == 0;
 }
